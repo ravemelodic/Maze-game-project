@@ -1,0 +1,99 @@
+//c语言
+#include<stdio.h>
+#include<stdlib.h>
+typedef struct path {   //存放横纵坐标，x为行(纵)，y为列(行)
+	int x;
+	int y;
+	path* next;
+	path* head;   //路径头节点
+}path;
+//push入栈函数
+void push(path* stack, int x, int y)  //使用栈用来存储路径  stack代表指向整个栈的指针
+{
+	path* new_path = (path*)malloc(sizeof(path));   //新入栈的节点---即找到新路线
+	//获取当前坐标
+	new_path->x = x;
+	new_path->y = y;
+	//将当前坐标的节点作为该路径的头节点
+	new_path->next = stack->head;
+	stack->head = new_path;
+}
+//pop出栈函数
+void pop(path* stack, int x, int y)
+{
+	stack->head = stack->head->next;   //将原头节点的下一个节点作为当前头节点(delete stack)
+}
+//迷宫实现
+void maze(int arr[5][5], path* stack, int x, int y)   //初始值为x=0,y=0;  入口(0,0)  出口(4,4)
+{
+
+}
+//主程序
+int main()
+{
+	{
+		int arr[5][5];
+		int i, j;
+		int x = 0, y = 0;
+		for (i = 0; i < 5; i++)
+		{
+			for (j = 0; j < 5; j++)
+			{
+				scanf("%d", &arr[i][j]);
+			}
+		}
+		path* top = (path*)malloc(sizeof(path));//栈顶指针
+		top->head = (path*)malloc(sizeof(path));
+		while (x != 4 && y != 4)  //当x==4,y==4时找到出口
+		{
+			//在保证不出边界的情况下向左走一格,如果没有遇见障碍入栈储存路径
+			if (arr[x][y + 1] == 0 && (y + 1) < 5)
+			{
+				y++;
+				push(top, x, y);//新路径入栈
+				return;
+			}
+			//在保证不出边界的情况下向下走一格,如果没有遇见障碍则入栈储存路径
+			if (arr[x + 1][y] == 0 && (x + 1) < 5)
+			{
+				x++;
+				push(top, x, y);
+				return;
+			}
+			if (arr[x][y - 1] == 0 && (y - 1) >= 0)
+			{
+				arr[x][y] = 1;  //将此路铺上障碍物，使得不会再走过此地
+				pop(top, x, y);
+				y--;
+				return;
+			}
+			if (arr[x - 1][y] == 0 && (x - 1) >= 0)
+			{
+				arr[x][y] = 1;
+				pop(top, x, y);
+				x--;
+				return;
+			}
+		}
+		printf("(0, 0)\n");
+		//此处数组是为了存储路径，因为使用的是栈结构，所以存储的路径为倒序储存，从path数组中打印输出也需要反向打印
+		int PATH[25] = { 0 };
+		int count = 0;
+
+		//将栈倒序的路径存储进数组中，二维数组太占用空间所以此处我们使用一维数组
+		while (top->head->next != NULL)
+		{
+			PATH[count] = top->head->x * 10 + top->head->y;  //利用x*10+y先变为一维数组存储数值方式
+			count++;
+			top->head = top->head->next;
+		}
+		for (i = count - 1; i >= 0; i--)
+		{
+			//再通过count将x,y转变为二维数组的x,y并逆序打印(路径开头一定是栈底)
+			int num_x = PATH[i] / 10;
+			int num_y = PATH[i] % 10;
+			//打印路径
+			printf("(%d, %d)\n", num_x, num_y);
+		}
+		return 0;
+	}
